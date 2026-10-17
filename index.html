@@ -3,84 +3,208 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VinsBill Cash Account Maintenance</title>
-  <!-- Firebase App & Auth SDKs via CDN -->
+  <title>VinsNetBill ISP Platform</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <style>
-    body { font-family: system-ui, sans-serif; background: #f8fafc; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-    .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; box-sizing: border-box; }
-    h2 { color: #0f172a; margin-top: 0; text-align: center; }
-    input, button, select { width: 100%; padding: 12px; margin: 10px 0; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 14px; }
-    button { background: #0284c7; color: white; border: none; font-weight: bold; cursor: pointer; }
-    button:hover { background: #0369a1; }
+    body { font-family: system-ui, sans-serif; background: #f8fafc; margin: 0; padding: 0; color: #1e293b; }
+    /* Top Navbar */
+    .navbar { background: white; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .nav-brand { font-weight: bold; font-size: 18px; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+    .nav-links { display: flex; gap: 15px; align-items: center; overflow-x: auto; }
+    .nav-link { background: none; border: none; cursor: pointer; font-size: 14px; padding: 8px 12px; border-radius: 6px; color: #64748b; font-weight: 500; white-space: nowrap; }
+    .nav-link:hover, .nav-link.active { background: #f1f5f9; color: #0284c7; }
+    .badge { background: #f59e0b; color: white; padding: 2px 6px; font-size: 11px; border-radius: 10px; margin-left: 4px; }
+    .btn-receive { background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    .btn-receive:hover { background: #059669; }
+
+    /* Main Container */
+    .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .card { background: white; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    
+    /* Summary Cards Grid */
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .metric-card { background: white; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; }
+    .metric-title { font-size: 13px; color: #64748b; font-weight: 600; text-transform: uppercase; }
+    .metric-value { font-size: 24px; font-weight: bold; color: #0f172a; margin: 8px 0; }
+    .metric-sub { font-size: 12px; color: #10b981; }
+
+    /* Forms & Tables */
+    input, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
+    th { background: #f8fafc; color: #475569; font-weight: 600; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
     .hidden { display: none; }
-    .dashboard { max-width: 800px; width: 100%; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { padding: 10px; border: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
-    th { background: #f1f5f9; }
   </style>
 </head>
 <body>
 
-<!-- Admin Login Box -->
-<div class="card" id="authBox">
-  <h2>Admin Cash Login</h2>
-  
-  <!-- Step 1: Phone Input -->
-  <div id="phone-step">
-    <label>Admin Mobile Number (+CountryCode)</label>
-    <input type="tel" id="phoneNumber" placeholder="+919876543210">
-    <div id="recaptcha-container"></div>
-    <button onclick="sendOTP()">Send OTP SMS</button>
-  </div>
-
-  <!-- Step 2: OTP Verification -->
-  <div id="otp-step" class="hidden">
-    <label>Enter 6-Digit OTP Code</label>
-    <input type="text" id="otpCode" placeholder="123456">
-    <button onclick="verifyOTP()">Verify & Login</button>
+<!-- Login Overlay -->
+<div class="container" id="authBox" style="max-width: 400px; margin-top: 100px;">
+  <div class="card">
+    <h2>Admin Login</h2>
+    <div id="phone-step">
+      <label>Mobile Number (+91...)</label>
+      <input type="tel" id="phoneNumber" placeholder="+919876543210">
+      <div id="recaptcha-container"></div>
+      <button onclick="sendOTP()" style="width:100%; padding:10px; background:#0284c7; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Send OTP</button>
+    </div>
+    <div id="otp-step" class="hidden">
+      <label>Enter 6-Digit OTP</label>
+      <input type="text" id="otpCode" placeholder="123456">
+      <button onclick="verifyOTP()" style="width:100%; padding:10px; background:#0284c7; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Verify & Login</button>
+    </div>
   </div>
 </div>
 
-<!-- Cash Management Dashboard (Hidden until logged in) -->
-<div class="card dashboard hidden" id="dashboardBox">
-  <h2>Cash Received Maintenance</h2>
-  <button onclick="logout()" style="background: #ef4444; width: auto; padding: 6px 12px; float: right;">Logout</button>
-  <div style="clear: both;"></div>
+<!-- Main Dashboard App -->
+<div id="dashboardApp" class="hidden">
+  <!-- Top Navigation Bar -->
+  <div class="navbar">
+    <div class="nav-brand">🛡️ VinsNetBill <span style="font-size:12px; color:#64748b; font-weight:normal;">ISP Platform</span></div>
+    <div class="nav-links">
+      <button class="nav-link active" onclick="switchTab('dashboard')">Dashboard</button>
+      <button class="nav-link" onclick="switchTab('register')">Cash Register</button>
+      <button class="nav-link" onclick="switchTab('reminders')">Reminders <span class="badge">40</span></button>
+      <button class="nav-link" onclick="switchTab('subscribers')">Subscribers</button>
+      <button class="nav-link" onclick="switchTab('history')">Receipt History</button>
+      <button class="nav-link" onclick="switchTab('settings')">Settings</button>
+    </div>
+    <div>
+      <button class="btn-receive" onclick="switchTab('register')">+ Receive Cash</button>
+      <button onclick="logout()" style="background:#ef4444; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; margin-left:10px;">Logout</button>
+    </div>
+  </div>
 
-  <!-- New Cash Entry Form -->
-  <h3 style="margin-bottom: 5px;">Add New Cash Receipt</h3>
-  <input type="text" id="receiptNo" placeholder="Receipt Number (e.g., REC-001)">
-  <input type="text" id="payerName" placeholder="Payer Name">
-  <input type="number" id="amount" placeholder="Amount Received">
-  <select id="category">
-    <option value="Client Payment">Client Payment</option>
-    <option value="Advance">Advance</option>
-    <option value="Other">Other</option>
-  </select>
-  <button onclick="addCashRecord()">Save Cash Record</button>
+  <div class="container">
+    
+    <!-- TAB 1: DASHBOARD -->
+    <div id="tab-dashboard" class="tab-content active">
+      <h2>ISP Billing & Revenue Dashboard</h2>
+      <p style="color: #64748b; margin-top: -10px;">Visualize monthly cash vs digital collections, recurring renewal health, and locality performance.</p>
+      
+      <!-- Summary Metric Cards -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-title">Monthly Collections (Current)</div>
+          <div class="metric-value" id="totalCollections">₹0</div>
+          <div class="metric-sub">↑ +0.0% vs last month</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Cash in Hand (This Month)</div>
+          <div class="metric-value" id="totalCashInHand">₹0</div>
+          <div class="metric-sub">Physical cash receipts</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Pending Renewal Dues</div>
+          <div class="metric-value" style="color: #d97706;">₹32,442</div>
+          <div class="metric-sub">40 subscribers due today</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Subscribers Base</div>
+          <div class="metric-value">58</div>
+          <div class="metric-sub">18 active lines connected</div>
+        </div>
+      </div>
 
-  <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+      <div class="card">
+        <h3>Recent Transactions Summary</h3>
+        <table id="dashboardTable">
+          <thead>
+            <tr><th>Receipt</th><th>Payer</th><th>Amount</th><th>Category</th></tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-  <h3>Recent Cash Records</h3>
-  <table id="recordsTable">
-    <thead>
-      <tr>
-        <th>Receipt</th>
-        <th>Payer</th>
-        <th>Amount</th>
-        <th>Category</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td colspan="4" style="text-align: center;">Loading records...</td></tr>
-    </tbody>
-  </table>
+    <!-- TAB 2: CASH REGISTER -->
+    <div id="tab-register" class="tab-content">
+      <h2>Cash Received Register</h2>
+      <div class="card" style="max-width: 600px;">
+        <h3>Add New Cash Receipt</h3>
+        <input type="text" id="receiptNo" placeholder="Receipt Number (e.g., REC-003)">
+        <input type="text" id="payerName" placeholder="Subscriber / Payer Name">
+        <input type="number" id="amount" placeholder="Amount Received (₹)">
+        <select id="category">
+          <option value="Monthly Renewal">Monthly Renewal</option>
+          <option value="New Connection">New Connection</option>
+          <option value="Advance Payment">Advance Payment</option>
+          <option value="Other">Other</option>
+        </select>
+        <button onclick="addCashRecord()" style="width:100%; padding:12px; background:#0284c7; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; margin-top:10px;">Save Cash Record</button>
+      </div>
+    </div>
+
+    <!-- TAB 3: REMINDERS -->
+    <div id="tab-reminders" class="tab-content">
+      <h2>Renewal Reminders & Dues</h2>
+      <div class="card">
+        <p>Automated WhatsApp & SMS reminder queue for active subscribers whose billing cycles are due.</p>
+        <table>
+          <thead>
+            <tr><th>Subscriber</th><th>Phone</th><th>Plan Due Date</th><th>Outstanding</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Sandeep Lgs</td><td>+91 98765 43210</td><td>18 Oct 2026</td><td>₹650</td><td><button style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Send WhatsApp Reminder</button></td></tr>
+            <tr><td>Chetan Mobiles</td><td>+91 91234 56789</td><td>19 Oct 2026</td><td>₹850</td><td><button style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Send WhatsApp Reminder</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 4: SUBSCRIBERS -->
+    <div id="tab-subscribers" class="tab-content">
+      <h2>Subscriber Management</h2>
+      <div class="card">
+        <p>Active OLT connections and broadband profile database.</p>
+        <table>
+          <thead>
+            <tr><th>Subscriber ID</th><th>Name</th><th>Package</th><th>IP / MAC</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>VINS-01</td><td>Sandeep</td><td>100 Mbps Unlimited</td><td>192.168.10.50</td><td><span style="color:green; font-weight:bold;">Active</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 5: RECEIPT HISTORY -->
+    <div id="tab-history" class="tab-content">
+      <h2>Complete Receipt History</h2>
+      <div class="card">
+        <table id="historyTable">
+          <thead>
+            <tr><th>Receipt</th><th>Payer</th><th>Amount</th><th>Category</th><th>Date</th></tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 6: SETTINGS -->
+    <div id="tab-settings" class="tab-content">
+      <h2>Platform Settings</h2>
+      <div class="card" style="max-width: 500px;">
+        <label>Backend API URL</label>
+        <input type="text" id="settingApi" value="https://cash-tracker-backend-78bd.onrender.com" disabled>
+        <label>MongoDB Cluster</label>
+        <input type="text" id="settingDb" value="vinsnetbill.rpipe8n.mongodb.net (cash_db)" disabled>
+        <label>Firebase Hosting Project</label>
+        <input type="text" id="settingFb" value="vinsbill-cash.web.app" disabled>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <script>
-  // Your Firebase Configuration
   const firebaseConfig = {
     apiKey: "AIzaSyD56cdjtIWmrRZbKQPfUv6Zl-i7Vbodmz8",
     authDomain: "vinsbill-cash.firebaseapp.com",
@@ -92,97 +216,84 @@
   };
   firebase.initializeApp(firebaseConfig);
 
-  // Invisible reCAPTCHA for phone authentication
-  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-    'size': 'invisible'
-  });
-
-  // Live Render Backend URL
-  const BACKEND_URL = "https://cash-tracker-backend-78bd.onrender.com"; 
+  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' });
+  const BACKEND_URL = "https://cash-tracker-backend-78bd.onrender.com";
   let authToken = "";
 
-  // 1. Send OTP
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+    if(tabId === 'dashboard' || tabId === 'history') fetchRecords();
+  }
+
   function sendOTP() {
     const phoneNumber = document.getElementById('phoneNumber').value;
     firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
-      .then((confirmationResult) => {
-        window.confirmationResult = confirmationResult;
+      .then((res) => {
+        window.confirmationResult = res;
         document.getElementById('phone-step').classList.add('hidden');
         document.getElementById('otp-step').classList.remove('hidden');
         alert("OTP sent successfully!");
-      })
-      .catch((error) => {
-        alert("SMS Error: " + error.message);
-      });
+      }).catch(err => alert("Error: " + err.message));
   }
 
-  // 2. Verify OTP & Load Dashboard
   function verifyOTP() {
     const code = document.getElementById('otpCode').value;
-    window.confirmationResult.confirm(code).then(async (result) => {
-      authToken = await result.user.getIdToken();
+    window.confirmationResult.confirm(code).then(async (res) => {
+      authToken = await res.user.getIdToken();
       document.getElementById('authBox').classList.add('hidden');
-      document.getElementById('dashboardBox').classList.remove('hidden');
+      document.getElementById('dashboardApp').classList.remove('hidden');
       fetchRecords();
-    }).catch((error) => {
-      alert("Invalid OTP code!");
-    });
+    }).catch(() => alert("Invalid OTP!"));
   }
 
-  // 3. Fetch Records from Backend
   async function fetchRecords() {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/cash-records`, {
+      const res = await fetch(`${BACKEND_URL}/api/cash-records`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
-      const result = await response.json();
-      if(result.success) {
-        const tbody = document.querySelector('#recordsTable tbody');
-        tbody.innerHTML = result.data.map(r => `
-          <tr>
-            <td>${r.receiptNo}</td>
-            <td>${r.payerName}</td>
-            <td>₹${r.amount}</td>
-            <td>${r.category}</td>
-          </tr>
-        `).join('') || '<tr><td colspan="4" style="text-align: center;">No records found</td></tr>';
+      const data = await res.json();
+      if(data.success && data.data) {
+        let total = 0;
+        const rows = data.data.map(r => {
+          total += Number(r.amount || 0);
+          return `<tr><td>${r.receiptNo}</td><td>${r.payerName}</td><td>₹${r.amount}</td><td>${r.category}</td></tr>`;
+        }).join('') || '<tr><td colspan="4" style="text-align:center;">No records found</td></tr>';
+        
+        document.querySelector('#dashboardTable tbody').innerHTML = rows;
+        document.querySelector('#historyTable tbody').innerHTML = data.data.map(r => `<tr><td>${r.receiptNo}</td><td>${r.payerName}</td><td>₹${r.amount}</td><td>${r.category}</td><td>${new Date(r.createdAt || Date.now()).toLocaleDateString()}</td></tr>`).join('');
+        document.getElementById('totalCollections').innerText = `₹${total}`;
+        document.getElementById('totalCashInHand').innerText = `₹${total}`;
       }
-    } catch (err) {
-      console.error("Error fetching records:", err);
-    }
+    } catch(err) { console.error(err); }
   }
 
-  // 4. Add New Cash Record
   async function addCashRecord() {
-    const data = {
+    const body = {
       receiptNo: document.getElementById('receiptNo').value,
       payerName: document.getElementById('payerName').value,
       amount: Number(document.getElementById('amount').value),
       category: document.getElementById('category').value,
       agent: "Admin"
     };
-
-    const response = await fetch(`${BACKEND_URL}/api/cash-records`, {
+    const res = await fetch(`${BACKEND_URL}/api/cash-records`, {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}` 
-      },
-      body: JSON.stringify(data)
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify(body)
     });
-    const result = await response.json();
+    const result = await res.json();
     if(result.success) {
       alert("Cash record saved successfully!");
-      fetchRecords();
-    } else {
-      alert("Error saving record");
-    }
+      document.getElementById('receiptNo').value = '';
+      document.getElementById('payerName').value = '';
+      document.getElementById('amount').value = '';
+      switchTab('dashboard');
+    } else { alert("Error saving record"); }
   }
 
-  function logout() {
-    firebase.auth().signOut().then(() => location.reload());
-  }
+  function logout() { firebase.auth().signOut().then(() => location.reload()); }
 </script>
-
 </body>
 </html>
